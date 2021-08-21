@@ -5,6 +5,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+class PixelCNN(nn.Module):
+    pass
+
 class Diffusion(nn.Module):
 
     def __init__(self, alpha):
@@ -16,7 +19,8 @@ class Diffusion(nn.Module):
         self.beta2 = math.sqrt(1.0-alpha)
 
     def _forward(self, x):
-        pass
+        x = self.beta1*x + self.beta2*torch.randn_like(x)
+        return x
 
     def _backward(self, x):
         pass
