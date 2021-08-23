@@ -7,11 +7,21 @@ import torch.nn.functional as F
 
 class ResNetBlock(nn.Module):
 
-    def __init__(self):
+    def __init__(self, nchan, act=F.relu):
         super().__init__()
 
+        self.down_sample = nn.Conv2d(nchan, nchan, 3, 2, 1)
+        self.up_sample = nn.ConvTranspose2d(nchan, nchan, 3, 2, 1)
+        self.act = act
+
     def forward(self, x):
-        pass
+
+        h = self.down_sample(x)
+        h = self.act(h)
+        h = self.up_sample(x)
+        h = self.act(h)
+
+        return x + h
 
 class PixelCNN(nn.Module):
     pass
