@@ -5,16 +5,34 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# Generate Positional Embedding
+class PosEmbedding(nn.Module):
+    def __init__(self, ndim):
+        super().__init__()
+        self.ndim = ndim
+
+    def forward(self, bs, sz):
+        timesteps = torch.arange(sz, dtype=torch.float32).repeat(bs, 1)
+        half_dim = self.ndim // 2
+        emb = math.log(10000) / (half_dim - 1)
+        emb = torch.exp(torch.arange(half_dim, dtype=torch.float32) * -emb)
+        emb = timesteps.unsqueeze(-1) * emb.view(1, 1, -1)
+        emb = torch.cat([emb.sin(), emb.cos()], dim=-1)
+        print(emb.shape, torch.zeros(bs, sz, 1, dtype=torch.float32).shape)
+        if self.ndim % 2 == 1:  # zero pad
+            emb = torch.cat([emb, torch.zeros(bs, sz, 1, dtype=torch.float32)], dim=-1)
+        return emb
+
 class ResNetBlock(nn.Module):
 
-    def __init__(self, nchan, act=F.relu):
+    def __init__(self, in_chan, out_chan, act=F.relu):
         super().__init__()
 
-        self.down_sample = nn.Conv2d(nchan, nchan, 3, 2, 1)
-        self.up_sample = nn.ConvTranspose2d(nchan, nchan, 3, 2, 1)
+        self.down_sample = nn.Conv2d(in_chan, out_chan, 3, 2, 1)
+        self.up_sample = nn.ConvTranspose2d(in_chan, out_chan, 3, 2, 1)
         self.act = act
 
-    def forward(self, x):
+    def forward(self, x, t_embed):
 
         h = self.down_sample(x)
         h = self.act(h)
