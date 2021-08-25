@@ -35,7 +35,7 @@ class ResNetBlock(nn.Module):
     def forward(self, x, t_embed):
 
         h = self.down_sample(x)
-        h = self.act(h)
+        h = self.act(h + t_embed)
         h = self.up_sample(x)
         h = self.act(h)
 
