@@ -33,10 +33,11 @@ class ResNetBlock(nn.Module):
         self.act = act
 
     def forward(self, x, t_embed):
-
+        # N x C x 1 x 1
+        t_embed = t_embed.view(t_embed.size(0), t_embed.size(1), 1, 1)
         h = self.down_sample(x)
         h = self.act(h + t_embed)
-        h = self.up_sample(x)
+        h = self.up_sample(h)
         h = self.act(h)
 
         return x + h
