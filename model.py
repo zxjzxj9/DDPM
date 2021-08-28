@@ -29,19 +29,26 @@ class ResNetBlock(nn.Module):
         super().__init__()
 
         self.down_sample = nn.Conv2d(in_chan, out_chan, 3, 2, 1)
-        self.up_sample = nn.ConvTranspose2d(in_chan, out_chan, 3, 2, 1)
+        self.up_sample = nn.ConvTranspose2d(in_chan, out_chan, 4, 2, 1)
+        self.res = nn.Conv2d(in_chan, out_chan, 1)
         self.fc = nn.Conv2d(nembed, out_chan, 1)
         self.act = act
 
     def forward(self, x, t_embed):
-        # N x C x 1 x 1
+
+        # Embedding
         t_embed = t_embed.view(t_embed.size(0), t_embed.size(1), 1, 1)
         t_embed = self.fc(t_embed)
 
-        h = self.down_sample(x)
+        # Downsample -> Upsample
+        h = self.act(x)
+        h = self.down_sample(h)
         h = self.act(h + t_embed)
         h = self.up_sample(h)
         h = self.act(h)
+
+        # Residue
+        x = self.res(x)
         return x + h
 
 class PixelCNN(nn.Module):
