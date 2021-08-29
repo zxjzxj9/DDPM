@@ -51,8 +51,16 @@ class ResNetBlock(nn.Module):
         x = self.res(x)
         return x + h
 
-class PixelCNN(nn.Module):
-    pass
+# see https://github.com/hojonathanho/diffusion/blob/master/diffusion_tf/models/unet.py
+
+class UNet(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+
+    def forward(selfs):
+        pass
+
 
 class Diffusion(nn.Module):
 
