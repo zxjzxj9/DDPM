@@ -28,8 +28,8 @@ class ResNetBlock(nn.Module):
     def __init__(self, in_chan, out_chan, nembed, act=F.relu):
         super().__init__()
 
-        self.down_sample = nn.Conv2d(in_chan, out_chan, 3, 2, 1)
-        self.up_sample = nn.ConvTranspose2d(in_chan, out_chan, 4, 2, 1)
+        self.conv1 = nn.Conv2d(in_chan, out_chan, 3, 2, 1)
+        self.conv2 = nn.Conv2d(in_chan, out_chan, 3, 2, 1)
         self.res = nn.Conv2d(in_chan, out_chan, 1)
         self.fc = nn.Conv2d(nembed, out_chan, 1)
         self.act = act
@@ -42,9 +42,9 @@ class ResNetBlock(nn.Module):
 
         # Downsample -> Upsample
         h = self.act(x)
-        h = self.down_sample(h)
+        h = self.conv1(h)
         h = self.act(h + t_embed)
-        h = self.up_sample(h)
+        h = self.conv2(h)
         h = self.act(h)
 
         # Residue
@@ -55,8 +55,10 @@ class ResNetBlock(nn.Module):
 
 class UNet(nn.Module):
 
-    def __init__(self):
+    def __init__(self, nchan_scale = [1, 2, 4, 8]):
         super().__init__()
+
+        self.nchan_scale = nchan_scale
 
     def forward(selfs):
         pass
