@@ -4,6 +4,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import math
 
 # Generate Positional Embedding
 class PosEmbedding(nn.Module):
@@ -23,13 +24,14 @@ class PosEmbedding(nn.Module):
             emb = torch.cat([emb, torch.zeros(bs, sz, 1, dtype=torch.float32)], dim=-1)
         return emb
 
+# Residue Conv Block
 class ResNetBlock(nn.Module):
 
     def __init__(self, in_chan, out_chan, nembed, act=F.relu):
         super().__init__()
 
-        self.conv1 = nn.Conv2d(in_chan, out_chan, 3, 2, 1)
-        self.conv2 = nn.Conv2d(in_chan, out_chan, 3, 2, 1)
+        self.conv1 = nn.Conv2d(in_chan, out_chan, 3, 1, 1)
+        self.conv2 = nn.Conv2d(in_chan, out_chan, 3, 1, 1)
         self.res = nn.Conv2d(in_chan, out_chan, 1)
         self.fc = nn.Conv2d(nembed, out_chan, 1)
         self.act = act
@@ -51,16 +53,52 @@ class ResNetBlock(nn.Module):
         x = self.res(x)
         return x + h
 
-# see https://github.com/hojonathanho/diffusion/blob/master/diffusion_tf/models/unet.py
+class LinearProj(nn.Module):
+    def __init__(self, in_chan, out_chan):
+        super().__init__()
 
+        self.w = nn.Parameter(torch.zeros(out_chan, in_chan))
+        self.b = nn.Parameter(torch.zeros(1, out_chan, 1, 1))
+        nn.init.xavier_normal_(self.w.data)
+
+    def forward(self, x):
+        x = torch.einsum('nchw,kc->nkhw', x, self.w)
+        x = x + self.b
+        return x
+
+class SelfAttn(nn.Module):
+    def __init__(self, nchan):
+        super().__init__()
+
+        self.nchan = nchan
+        self.scale = 1.0/math.sqrt(nchan)
+        self.kproj = LinearProj(nchan, nchan)
+        self.qproj = LinearProj(nchan, nchan)
+        self.vproj = LinearProj(nchan, nchan)
+        self.hproj = LinearProj(nchan, nchan)
+
+    def forward(self, x):
+
+        b, c, h, w = x.shape
+        k = self.kproj(x)
+        q = self.qproj(x)
+        v = self.vproj(x)
+
+        w = torch.einsum('bchw,bcHW->bhwHW', q, k)*self.scale
+        w = w.view(b, h, w, h*w).softmax(dim=-1).view(b, h, w, h, w)
+        v = torch.einsum('bhwHW,bcHW->bchw', w, v)
+        h = self.hproj(v)
+
+        return h + x
+
+# see https://github.com/hojonathanho/diffusion/blob/master/diffusion_tf/models/unet.py
 class UNet(nn.Module):
 
     def __init__(self, nchan_scale = [1, 2, 4, 8]):
         super().__init__()
-
         self.nchan_scale = nchan_scale
 
-    def forward(selfs):
+    def forward(self, x):
         pass
 
 
