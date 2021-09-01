@@ -94,13 +94,19 @@ class SelfAttn(nn.Module):
 # see https://github.com/hojonathanho/diffusion/blob/master/diffusion_tf/models/unet.py
 class UNet(nn.Module):
 
-    def __init__(self, nchan_scale = [1, 2, 4, 8]):
+    def __init__(self, nchan, nchan_scale = [1, 2, 4, 8]):
         super().__init__()
+        self.nchan = nchan
         self.nchan_scale = nchan_scale
+        self.down_sample = nn.ModuleList([
+            nn.Conv2d(nchan*s1, nchan*s2, 3, 2, 1) for s1, s2 in zip(nchan[:-1], nchan[1:])
+        ])
+        self.up_sample = nn.ModuleList([
+            nn.ConvTranspose2d(nchan*s1, nchan*s2, 4, 2) for s2, s1 in reversed(zip(nchan[:-1], nchan[1:]))
+        ])
 
-    def forward(self, x):
+    def forward(self, x, t_embed):
         pass
-
 
 class Diffusion(nn.Module):
 
