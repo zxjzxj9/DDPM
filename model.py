@@ -101,12 +101,15 @@ class UNet(nn.Module):
         self.down_sample = nn.ModuleList([
             nn.Conv2d(nchan*s1, nchan*s2, 3, 2, 1) for s1, s2 in zip(nchan[:-1], nchan[1:])
         ])
+        self.res1 = nn.ModuleList([ResNetBlock(nchan*s) for s in nchan_scale])
         self.up_sample = nn.ModuleList([
             nn.ConvTranspose2d(nchan*s1, nchan*s2, 4, 2) for s2, s1 in reversed(zip(nchan[:-1], nchan[1:]))
         ])
+        self.res2 = nn.ModuleList([ResNetBlock(nchan * s) for s in reversed(nchan_scale)])
 
     def forward(self, x, t_embed):
-        pass
+        hs = []
+
 
 class Diffusion(nn.Module):
 
