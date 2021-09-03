@@ -98,10 +98,10 @@ class UNet(nn.Module):
         super().__init__()
         self.nchan = nchan
         self.nchan_scale = nchan_scale
+        self.res1 = nn.ModuleList([ResNetBlock(nchan*s) for s in nchan_scale])
         self.down_sample = nn.ModuleList([
             nn.Conv2d(nchan*s1, nchan*s2, 3, 2, 1) for s1, s2 in zip(nchan[:-1], nchan[1:])
         ])
-        self.res1 = nn.ModuleList([ResNetBlock(nchan*s) for s in nchan_scale])
         self.up_sample = nn.ModuleList([
             nn.ConvTranspose2d(nchan*s1, nchan*s2, 4, 2) for s2, s1 in reversed(zip(nchan[:-1], nchan[1:]))
         ])
@@ -109,6 +109,20 @@ class UNet(nn.Module):
 
     def forward(self, x, t_embed):
         hs = []
+
+        h = x
+        for mres, mds in zip(self.res1, self.down_sample):
+            h = mres(h, t_embed)
+            hs.append(h)
+            h = mds(h)
+
+        # TODO: fix hte input size
+        for mus, mres in zip(self.up_sample, self.res2):
+            h = mus(h)
+            hs.append(h)
+            h = mres(h, t_embed)
+
+        return h
 
 
 class Diffusion(nn.Module):
