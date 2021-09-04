@@ -94,18 +94,18 @@ class SelfAttn(nn.Module):
 # see https://github.com/hojonathanho/diffusion/blob/master/diffusion_tf/models/unet.py
 class UNet(nn.Module):
 
-    def __init__(self, nchan, nchan_scale = [1, 2, 4, 8]):
+    def __init__(self, nchan, nembed, nchan_scale = [1, 2, 4, 8]):
         super().__init__()
         self.nchan = nchan
         self.nchan_scale = nchan_scale
-        self.res1 = nn.ModuleList([ResNetBlock(nchan*s) for s in nchan_scale])
+        self.res1 = nn.ModuleList([ResNetBlock(nchan*s, nchan*s, nembed) for s in nchan_scale])
         self.down_sample = nn.ModuleList([
             nn.Conv2d(nchan*s1, nchan*s2, 3, 2, 1) for s1, s2 in zip(nchan[:-1], nchan[1:])
         ])
         self.up_sample = nn.ModuleList([
             nn.ConvTranspose2d(nchan*s1, nchan*s2, 4, 2) for s2, s1 in reversed(zip(nchan[:-1], nchan[1:]))
         ])
-        self.res2 = nn.ModuleList([ResNetBlock(nchan * s) for s in reversed(nchan_scale)])
+        self.res2 = nn.ModuleList([ResNetBlock(2*nchan * s, nchan*s, nembed) for s in reversed(nchan_scale)])
 
     def forward(self, x, t_embed):
         hs = []
@@ -116,10 +116,9 @@ class UNet(nn.Module):
             hs.append(h)
             h = mds(h)
 
-        # TODO: fix hte input size
-        for mus, mres in zip(self.up_sample, self.res2):
-            h = mus(h)
-            hs.append(h)
+        # TODO: fix hidden input size
+        for mus, mres, prev_h in zip(self.up_sample, self.res2, hs):
+            h = mus(torch.cat([h, hs], dim=1))
             h = mres(h, t_embed)
 
         return h
