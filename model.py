@@ -113,13 +113,17 @@ class UNet(nn.Module):
         h = x
         for mres, mds in zip(self.res1, self.down_sample):
             h = mres(h, t_embed)
+            h = F.relu(h)
             hs.append(h)
             h = mds(h)
+            h = F.relu(h)
 
         # TODO: fix hidden input size
         for mus, mres, prev_h in zip(self.up_sample, self.res2, hs):
-            h = mus(torch.cat([h, hs], dim=1))
+            h = mus(torch.cat([h, prev_h], dim=1))
+            h = F.relu(h)
             h = mres(h, t_embed)
+            h = F.relu(h)
 
         return h
 
