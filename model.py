@@ -125,6 +125,10 @@ class UNet(nn.Module):
             hs.append(h)
             h = mds(h)
 
+        h = self.res1(h, t_embed)
+        h = self.attn_m1(h)
+        h = self.res2(h, t_embed)
+
         # TODO: fix hidden input size
         for mus, mres, vit, prev_h in zip(self.up_sample, self.res2, self.vit2, hs):
             h = mus(torch.cat([h, prev_h], dim=1))
