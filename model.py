@@ -115,6 +115,8 @@ class UNet(nn.Module):
         self.vit2 = nn.ModuleList([SelfAttn(2*nchan*s) for s in nchan_scale])
         self.res2 = nn.ModuleList([ResNetBlock(2*nchan * s, nchan*s, nembed) for s in reversed(nchan_scale)])
 
+        self.conv_out = nn.Conv2d(nchan, nchan, 3, 1)
+
     def forward(self, x, t_embed):
         hs = []
 
@@ -136,6 +138,8 @@ class UNet(nn.Module):
             h = mres(h, t_embed)
             h = vit(h)
 
+        h = F.relu(h)
+        h = self.conv_out(h)
         return h
 
 
