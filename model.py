@@ -143,18 +143,12 @@ class UNet(nn.Module):
         return h
 
 
-class Diffusion(nn.Module):
+class GaussDiffuse(nn.Module):
 
-    def __init__(self, alpha):
+    def __init__(self):
         super().__init__()
 
-        if alpha > 1 or alpha < 0:
-            raise Exception(f"Invalid alpha value: {alpha:12.6f}")
-        self.beta1 = math.sqrt(alpha)
-        self.beta2 = math.sqrt(1.0-alpha)
-
     def _forward(self, x):
-        x = self.beta1*x + self.beta2*torch.randn_like(x)
         return x
 
     def _backward(self, x):
@@ -162,3 +156,7 @@ class Diffusion(nn.Module):
 
     def forward(self, x):
         pass
+
+
+if __name__ == "__main__":
+    pass
