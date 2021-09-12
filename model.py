@@ -148,10 +148,10 @@ class GaussDiffuse(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def _forward(self, x):
+    def _denoise(self, x):
         return x
 
-    def _backward(self, x):
+    def _diffuse(self, x):
         pass
 
     def forward(self, x):
