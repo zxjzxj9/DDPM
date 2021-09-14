@@ -145,8 +145,13 @@ class UNet(nn.Module):
 
 class GaussDiffuse(nn.Module):
 
-    def __init__(self, nchan, nembed, nchan_scale):
+    def __init__(self, nchan, nembed, nchan_scale, tstep):
         super().__init__()
+
+        self.nchan = nchan
+        self.nembed = nembed
+        self.nchan_scale = nchan_scale
+        self.tstep = tstep
         self.unet = UNet(nchan, nembed, nchan_scale)
 
     def _denoise(self, x):
