@@ -161,7 +161,7 @@ class GaussDiffuse(nn.Module):
 
     def _diffuse(self, x):
         for _ in range(self.tstep):
-            pass
+            x += torch.randn_like(x)*self.sigma + self.mu
 
     def forward(self, x):
         pass
