@@ -152,6 +152,7 @@ class GaussDiffuse(nn.Module):
         self.nembed = nembed
         self.nchan_scale = nchan_scale
         self.tstep = tstep
+        self.embed = PosEmbedding(self.nembed)
         self.unet = UNet(nchan, nembed, nchan_scale)
         self.mu = mu
         self.sigma = sigma
@@ -162,6 +163,7 @@ class GaussDiffuse(nn.Module):
     def _diffuse(self, x):
         for _ in range(self.tstep):
             x += torch.randn_like(x)*self.sigma + self.mu
+        return x
 
     def forward(self, x):
         pass
