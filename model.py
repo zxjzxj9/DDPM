@@ -166,7 +166,11 @@ class GaussDiffuse(nn.Module):
         return x
 
     def forward(self, x):
-        pass
+        if self.training:
+            # In training mode, diffusing the input dataset
+            return self._diffuse(x)
+        else:
+            return self._denoise(x)
 
 
 if __name__ == "__main__":
