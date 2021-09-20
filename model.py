@@ -158,7 +158,7 @@ class GaussDiffuse(nn.Module):
         self.sigma = sigma
 
     def _denoise(self, x):
-        return x
+        return self.unet(x, self.embed)
 
     def _diffuse(self, x):
         for _ in range(self.tstep):
