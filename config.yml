@@ -1,1 +1,5 @@
 learning_rate: 0.001
+batch_size: 256
+time_step: 32
+height: 128
+width: 128
