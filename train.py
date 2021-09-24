@@ -9,4 +9,5 @@ arg.add_argument("-c", "--config", type=str, default="config.yml", help="Param c
 if __name__ == "__main__":
     opt = arg.parse_args()
     with open(opt.config, "r") as fin:
-        conf = yaml.SafeLoader(fin)
+        conf = yaml.load(fin, Loader=yaml.SafeLoader)
+    print(conf)
