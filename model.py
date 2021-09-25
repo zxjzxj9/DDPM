@@ -110,7 +110,7 @@ class UNet(nn.Module):
         self.res_m2 = nn.Conv2d(nchan*nchan_scale[-1])
         # Upsample
         self.up_sample = nn.ModuleList([
-            nn.ConvTranspose2d(nchan*s1, nchan*s2, 4, 2) for s2, s1 in reversed(zip(nchan[:-1], nchan[1:]))
+            nn.ConvTranspose2d(nchan*s1, nchan*s2, 4, 2) for s2, s1 in reversed(zip(nchan_scale[:-1], nchan_scale[1:]))
         ])
         self.vit2 = nn.ModuleList([SelfAttn(2*nchan*s) for s in nchan_scale])
         self.res2 = nn.ModuleList([ResNetBlock(2*nchan * s, nchan*s, nembed) for s in reversed(nchan_scale)])
@@ -178,4 +178,4 @@ class GaussDiffuse(nn.Module):
 
 
 if __name__ == "__main__":
-    pass
+    model = UNet(3, 12)
