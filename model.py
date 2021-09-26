@@ -102,12 +102,12 @@ class UNet(nn.Module):
         self.res1 = nn.ModuleList([ResNetBlock(nchan*s, nchan*s, nembed) for s in nchan_scale])
         self.vit1 = nn.ModuleList([SelfAttn(nchan*s) for s in nchan_scale])
         self.down_sample = nn.ModuleList([
-            nn.Conv2d(nchan*s1, nchan*s2, 3, 2, 1) for s1, s2 in zip(nchan[:-1], nchan[1:])
+            nn.Conv2d(nchan*s1, nchan*s2, 3, 2, 1) for s1, s2 in zip(nchan_scale[:-1], nchan_scale[1:])
         ])
         # Middle model
-        self.res_m1 = nn.Conv2d(nchan*nchan_scale[-1])
-        self.attn_m1 = SelfAttn(nchan*nchan_scale[-1])
-        self.res_m2 = nn.Conv2d(nchan*nchan_scale[-1])
+        self.res_m1 = nn.Conv2d(nchan*nchan_scale[-1], nchan*nchan_scale[-1])
+        self.attn_m1 = SelfAttn(nchan*nchan_scale[-1], nchan*nchan_scale[-1])
+        self.res_m2 = nn.Conv2d(nchan*nchan_scale[-1], nchan*nchan_scale[-1])
         # Upsample
         self.up_sample = nn.ModuleList([
             nn.ConvTranspose2d(nchan*s1, nchan*s2, 4, 2) for s2, s1 in reversed(zip(nchan_scale[:-1], nchan_scale[1:]))
