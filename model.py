@@ -105,9 +105,9 @@ class UNet(nn.Module):
             nn.Conv2d(nchan*s1, nchan*s2, 3, 2, 1) for s1, s2 in zip(nchan_scale[:-1], nchan_scale[1:])
         ])
         # Middle model
-        self.res_m1 = nn.Conv2d(nchan*nchan_scale[-1], nchan*nchan_scale[-1])
-        self.attn_m1 = SelfAttn(nchan*nchan_scale[-1], nchan*nchan_scale[-1])
-        self.res_m2 = nn.Conv2d(nchan*nchan_scale[-1], nchan*nchan_scale[-1])
+        self.res_m1 = nn.Conv2d(nchan*nchan_scale[-1], nchan*nchan_scale[-1], 3, 1, 1)
+        self.attn_m1 = SelfAttn(nchan*nchan_scale[-1], nchan*nchan_scale[-1], 3, 1, 1)
+        self.res_m2 = nn.Conv2d(nchan*nchan_scale[-1], nchan*nchan_scale[-1], 3, 1, 1)
         # Upsample
         self.up_sample = nn.ModuleList([
             nn.ConvTranspose2d(nchan*s1, nchan*s2, 4, 2) for s2, s1 in reversed(zip(nchan_scale[:-1], nchan_scale[1:]))
