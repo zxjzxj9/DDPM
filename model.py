@@ -179,4 +179,5 @@ class GaussDiffuse(nn.Module):
 
 
 if __name__ == "__main__":
-    model = UNet(3, 12)
+    model1 = ResNetBlock(32, 64, 128)
+    model2 = UNet(3, 12)
