@@ -146,7 +146,7 @@ class UNet(nn.Module):
 
 class GaussDiffuse(nn.Module):
 
-    def __init__(self, nchan, nembed, nchan_scale, h, w, tstep, mu, sigma):
+    def __init__(self, nchan, nembed, nchan_scale, h, w, tstep, mu, sigma, alpha):
         super().__init__()
 
         self.nchan = nchan
@@ -160,8 +160,12 @@ class GaussDiffuse(nn.Module):
         self.h = h
         self.w = w
 
+        # This alpha should be multiplication of alphas, alpha = alpha_1 * alpha_2 * ... * alpha_t
+        self.alpha = alpha
+
     def _denoise(self, bs, sz):
         embed = self.embed(bs, sz)
+        t = torch.randint(0, self.tstep, bs)
         x = torch.randn(bs, 3, self.h, self.w)
         return self.unet(x, embed)
 
