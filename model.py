@@ -164,10 +164,9 @@ class GaussDiffuse(nn.Module):
         self.alpha = alpha
 
     def _denoise(self, bs, sz):
-        embed = self.embed(bs, sz)
         t = torch.randint(0, self.tstep, bs)
         x = torch.randn(bs, 3, self.h, self.w)
-        t_embed = self.embed(t)
+        t_embed = self.embed(bs, t)
         z_t = self.unet(x, t_embed)
         return z_t*x
 
