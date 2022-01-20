@@ -162,14 +162,16 @@ class GaussDiffuse(nn.Module):
 
         # This alpha should be multiplication of alphas, alpha = alpha_1 * alpha_2 * ... * alpha_t
         self.alpha = alpha
+        self.a1 = math.sqrt(self.alpha)
+        self.a2 = math.sqrt(1-self.alpha)
 
     def _diffuse(self, bs, x):
         # From 0 to T
         t = torch.randint(0, self.tstep, bs)
-        x = torch.randn(bs, 3, self.h, self.w)
+        eps = torch.randn(bs, 3, self.h, self.w)
         t_embed = self.embed(bs, t)
-        z_t = self.unet(x, t_embed)
-        return z_t*x
+        z_t = self.unet(self.a1*x + self.a2*eps, t_embed)
+        return (eps - z_t).square().mean()
 
     def _denoise(self, sz):
         # From 0 to T
