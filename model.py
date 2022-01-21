@@ -165,9 +165,9 @@ class GaussDiffuse(nn.Module):
         self.a1 = math.sqrt(self.alpha)
         self.a2 = math.sqrt(1-self.alpha)
 
-    def _diffuse(self, bs, x):
+    def _diffuse(self, bs, x, t):
         # From 0 to T
-        t = torch.randint(0, self.tstep, bs)
+        # t = torch.randint(0, self.tstep, bs)
         eps = torch.randn(bs, 3, self.h, self.w)
         t_embed = self.embed(bs, t)
         z_t = self.unet(self.a1*x + self.a2*eps, t_embed)
