@@ -173,10 +173,13 @@ class GaussDiffuse(nn.Module):
         z_t = self.unet(self.a1*x + self.a2*eps, t_embed)
         return (eps - z_t).square().mean()
 
-    def _denoise(self, sz):
-        # From 0 to T
-        for _ in range(self.tstep):
-            x += torch.randn_like(x)*self.sigma + self.mu
+    def _denoise(self, bs, x, t, z=None):
+        if z is None:
+            z = 0.0
+        eps = torch.randn(bs, 3, self.h, self.w)
+        t_embed = self.embed(bs, t)
+        z_t = self.unet(x, t_embed)
+        x = 1.0/self.alpha * (x - (1 - self.alpha)*z_t/self.a2) + eps*z
         return x
 
     def forward(self, x):
