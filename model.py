@@ -190,6 +190,21 @@ class GaussDiffuse(nn.Module):
             return self._denoise(x)
 
 
+class DDPM(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+
+    def _diffuse(self, bs, x, t):
+        pass
+
+    def _denoise(self, bs, x, t, z=None):
+        pass
+
+    def forward(self, x):
+        pass
+
+
 if __name__ == "__main__":
     model1 = ResNetBlock(32, 64, 128)
     model2 = UNet(3, 12)
