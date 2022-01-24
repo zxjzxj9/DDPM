@@ -192,8 +192,18 @@ class GaussDiffuse(nn.Module):
 
 class DDPM(nn.Module):
 
-    def __init__(self):
+    def __init__(self, nchan, nembed, nchan_scale, h, w, T, mu, sigma, alpha):
         super().__init__()
+
+        self.nchan = nchan
+        self.nembed = nembed
+        self.nchan_scale = nchan_scale
+        self.h = h
+        self.w = w
+        self.T = T
+        self.mu = mu
+        self.sigma = sigma
+        self.alpha = alpha
 
     def _diffuse(self, bs, x, t):
         pass
