@@ -205,6 +205,9 @@ class DDPM(nn.Module):
         self.sigma = sigma
         self.alpha = alpha
 
+        self.mods = nn.Module(
+            [GaussDiffuse(nchan, nembed, nchan_scale, h, w, tstep, mu, sigma, alpha) for tstep in range(T)])
+
     def _diffuse(self, bs, x, t):
         pass
 
