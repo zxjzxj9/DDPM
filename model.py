@@ -165,9 +165,9 @@ class GaussDiffuse(nn.Module):
         self.a1 = math.sqrt(self.alpha)
         self.a2 = math.sqrt(1-self.alpha)
 
-    def _diffuse(self, bs, x, t):
+    def _diffuse(self, bs, x):
         # From 0 to T
-        # t = torch.randint(0, self.tstep, bs)
+        t = torch.randint(0, self.tstep, bs)
         eps = torch.randn(bs, 3, self.h, self.w)
         t_embed = self.embed(bs, t)
         z_t = self.unet(self.a1*x + self.a2*eps, t_embed)
@@ -188,34 +188,6 @@ class GaussDiffuse(nn.Module):
             return self._diffuse(x)
         else:
             return self._denoise(x)
-
-
-class DDPM(nn.Module):
-
-    def __init__(self, nchan, nembed, nchan_scale, h, w, T, mu, sigma, alpha):
-        super().__init__()
-
-        self.nchan = nchan
-        self.nembed = nembed
-        self.nchan_scale = nchan_scale
-        self.h = h
-        self.w = w
-        self.T = T
-        self.mu = mu
-        self.sigma = sigma
-        self.alpha = alpha
-
-        self.mods = nn.Module(
-            [GaussDiffuse(nchan, nembed, nchan_scale, h, w, tstep, mu, sigma, alpha) for tstep in range(T)])
-
-    def _diffuse(self, bs, x, t):
-        pass
-
-    def _denoise(self, bs, x, t, z=None):
-        pass
-
-    def forward(self, x):
-        pass
 
 
 if __name__ == "__main__":
