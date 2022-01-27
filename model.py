@@ -146,7 +146,7 @@ class UNet(nn.Module):
 
 class GaussDiffuse(nn.Module):
 
-    def __init__(self, nchan, nembed, nchan_scale, h, w, tstep, mu, sigma, alpha):
+    def __init__(self, nchan, nembed, nchan_scale, h, w, tstep, mu, sigma):
         super().__init__()
 
         self.nchan = nchan
@@ -161,25 +161,28 @@ class GaussDiffuse(nn.Module):
         self.w = w
 
         # This alpha should be multiplication of alphas, alpha = alpha_1 * alpha_2 * ... * alpha_t
-        self.alpha = alpha
-        self.a1 = math.sqrt(self.alpha)
-        self.a2 = math.sqrt(1-self.alpha)
+        # self.alpha = alpha
+        # self.a1 = math.sqrt(self.alpha)
+        # self.a2 = math.sqrt(1-self.alpha)
 
-    def _diffuse(self, bs, x):
+    def _diffuse(self, bs, x, alpha):
         # From 0 to T
         t = torch.randint(0, self.tstep, bs)
         eps = torch.randn(bs, 3, self.h, self.w)
         t_embed = self.embed(bs, t)
-        z_t = self.unet(self.a1*x + self.a2*eps, t_embed)
+        a1 = math.sqrt(alpha)
+        a2 = math.sqrt(1-alpha)
+        z_t = self.unet(a1*x + a2*eps, t_embed)
         return (eps - z_t).square().mean()
 
-    def _denoise(self, bs, x, t, z=None):
+    def _denoise(self, bs, x, t, alpha, z=None):
         if z is None:
             z = 0.0
         eps = torch.randn(bs, 3, self.h, self.w)
         t_embed = self.embed(bs, t)
         z_t = self.unet(x, t_embed)
-        x = 1.0/self.alpha * (x - (1 - self.alpha)*z_t/self.a2) + eps*z
+        a2 = math.sqrt(1 - alpha)
+        x = 1.0/alpha * (x - (1 - alpha)*z_t/a2) + eps*z
         return x
 
     def forward(self, x):
@@ -193,3 +196,4 @@ class GaussDiffuse(nn.Module):
 if __name__ == "__main__":
     model1 = ResNetBlock(32, 64, 128)
     model2 = UNet(3, 12)
+    model3 = GaussDiffuse(32, 64, 12, 128, 128, 16, 0.0, 1.0)
